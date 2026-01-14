@@ -1,0 +1,28 @@
+export function buildTechnicalAnalysisPrompt(): string {
+  return [
+    'Vystupuj ako expert na environmentálne inžinierstvo a stavebné právo. Analyzuj túto "Technickú správu".',
+    "",
+    "Tvojou úlohou je identifikovať:",
+    "1. Zdroje znečistenia ovzdušia (malé, stredné, veľké).",
+    "2. Vodné stavby (studne, ČOV, odlučovače, vsaky, atď.).",
+    "3. Špecifiká alebo prevádzkové súbory vyžadujúce osobitné povolenia.",
+    "4. Body, na ktoré treba upriamiť pozornosť pri povoľovaní.",
+    "",
+    "Formát odpovede – vráť JEDINÝ JSON objekt:",
+    "{",
+    '  "pollution_sources": ["string"],',
+    '  "water_structures": ["string"],',
+    '  "specific_operations": ["string"],',
+    '  "permitting_attention": [',
+    "    {",
+    '      "item": "string",',
+    '      "reason": "string",',
+    '      "legislation_reference": "string"',
+    "    }",
+    "  ]",
+    "}",
+    "",
+    "Obmedzenia:",
+    "- Výstup musí byť čistý JSON bez komentárov, bez textu mimo JSON.",
+  ].join("\n");
+}
