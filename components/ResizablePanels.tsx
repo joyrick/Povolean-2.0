@@ -22,10 +22,14 @@ export function ResizablePanels({
   const containerRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
 
-  const handleMouseDown = useCallback(() => {
+  const handleMouseDown = useCallback((e?: React.MouseEvent) => {
     isDragging.current = true;
     document.body.style.cursor = "col-resize";
     document.body.style.userSelect = "none";
+    // Prevent accidental selection on resizer
+    if (e) {
+      e.preventDefault();
+    }
   }, []);
 
   const handleMouseUp = useCallback(() => {
@@ -74,7 +78,7 @@ export function ResizablePanels({
 
       {/* Resizer */}
       <div
-        className="group relative h-full w-2 cursor-col-resize flex-shrink-0 bg-transparent hover:bg-blue-100 transition-colors"
+        className="group relative h-full w-2 cursor-col-resize flex-shrink-0 bg-transparent hover:bg-blue-100 transition-colors select-none"
         onMouseDown={handleMouseDown}
       >
         <div className="absolute left-1/2 top-0 h-full w-0.5 -translate-x-1/2 bg-slate-200 group-hover:bg-blue-400 transition-colors" />
