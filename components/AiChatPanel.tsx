@@ -2,10 +2,11 @@
 
 import type { ReactElement, FormEvent } from "react";
 import { useState, useRef, useEffect } from "react";
-import { MessageCircle, Sparkles, Send, FolderOpen, ChevronRight, ChevronDown, FileText, Folder, AlertTriangle, AlertCircle, CheckCircle2, ExternalLink, FileSearch } from "lucide-react";
+import { MessageCircle, Sparkles, Send, FolderOpen, ChevronRight, ChevronDown, FileText, Folder, AlertTriangle, AlertCircle, CheckCircle2, ExternalLink, FileSearch, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { GlossInlineLoader } from "@/components/GlossInlineLoader";
 
 type ChatMessage = {
   id: string;
@@ -560,9 +561,11 @@ export function AiChatPanel(): ReactElement {
             <div
               key={msg.id}
               className={
-                msg.role === "user"
-                  ? "ml-12 flex justify-end"
-                  : "mr-4 flex justify-start"
+                msg.type === "loading"
+                  ? "flex items-center gap-2 py-2 px-2 text-base"
+                  : msg.role === "user"
+                  ? "ml-12 flex justify-end text-base"
+                  : "mr-4 flex justify-start text-base"
               }
             >
               {msg.type === "hierarchy" && msg.hierarchyData ? (
@@ -573,14 +576,18 @@ export function AiChatPanel(): ReactElement {
                 <div className="w-full">
                   <ProblemTableCard data={msg.problemData} />
                 </div>
+              ) : msg.type === "loading" ? (
+                <>
+                  <Loader2 className="h-5 w-5 text-blue-400 animate-spin" />
+                  <span className="text-base text-slate-700 font-medium">{msg.content}</span>
+                </>
               ) : (
                 <div
                   className={
-                    msg.role === "user"
-                      ? "rounded-2xl bg-blue-600 px-4 py-3 text-sm text-white shadow-sm"
-                      : msg.type === "loading"
-                      ? "rounded-2xl bg-slate-100 px-4 py-3 text-sm text-slate-500 shadow-sm animate-pulse"
-                      : "rounded-2xl bg-slate-100 px-4 py-3 text-sm text-slate-800 shadow-sm"
+                    (msg.role === "user"
+                      ? "rounded-2xl bg-blue-600 px-4 py-3 text-white shadow-sm"
+                      : "rounded-2xl bg-slate-100 px-4 py-3 text-slate-800 shadow-sm") +
+                    " text-base"
                   }
                 >
                   {msg.content}
