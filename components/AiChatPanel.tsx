@@ -514,7 +514,7 @@ export function AiChatPanel(): ReactElement {
         <Button
           variant="outline"
           size="sm"
-          className="ml-auto text-xs border-slate-300 text-slate-700 hover:bg-slate-100"
+          className="ml-auto text-xs border-slate-300 text-slate-700 hover:bg-slate-100 cursor-pointer"
           onClick={handleNewConversation}
           disabled={loading}
         >
@@ -537,7 +537,7 @@ export function AiChatPanel(): ReactElement {
               <div className="flex flex-col gap-2">
                 <Button
                   variant="outline"
-                  className="text-sm border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300"
+                  className="text-sm border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 cursor-pointer"
                   onClick={() => runMockWorkflow()}
                   disabled={loading}
                 >
@@ -546,7 +546,7 @@ export function AiChatPanel(): ReactElement {
                 </Button>
                 <Button
                   variant="outline"
-                  className="text-sm border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300"
+                  className="text-sm border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 cursor-pointer"
                   onClick={() => runDataVerificationWorkflow()}
                   disabled={loading}
                 >
@@ -621,7 +621,7 @@ export function AiChatPanel(): ReactElement {
           <Button
             type="submit"
             size="icon"
-            className="h-9 w-9 rounded-full bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+            className="h-9 w-9 rounded-full bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 cursor-pointer"
             disabled={loading}
           >
             <Send className="h-5 w-5" />
