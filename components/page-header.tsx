@@ -55,8 +55,9 @@ export function PageHeader({
             <Button
               variant="outline"
               size="sm"
-              className="flex items-center gap-2 rounded-full border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 hover:text-blue-800"
+              className="flex items-center gap-2 rounded-full border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 hover:text-blue-800 cursor-pointer"
               onClick={() => router.push("/chat")}
+              type="button"
             >
               <Bot className="h-4 w-4" />
               <span>Agent</span>
@@ -66,8 +67,9 @@ export function PageHeader({
             <Button
               variant="outline"
               size="sm"
-              className="flex items-center gap-2 rounded-full"
+              className="flex items-center gap-2 rounded-full cursor-pointer"
               onClick={() => router.push("/")}
+              type="button"
             >
               <span>Dashboard</span>
             </Button>
