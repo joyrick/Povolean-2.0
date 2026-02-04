@@ -649,7 +649,7 @@ export function AiChatPanel(): ReactElement {
       {/* Overlay: expanded full table */}
       {expandedTableData && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6">
-          <div className="w-full max-w-4xl h-[80vh] overflow-auto rounded-2xl bg-white shadow-xl border border-slate-200 p-4">
+          <div className="w-full max-w-full h-[80vh] overflow-auto rounded-2xl bg-white shadow-xl border border-slate-200 p-4">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-lg font-semibold">Kompletná kontrola — Detaily problémov</h3>
               <div className="flex items-center gap-2">
@@ -664,7 +664,7 @@ export function AiChatPanel(): ReactElement {
       {/* Overlay: expanded hierarchy */}
       {expandedHierarchyData && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6">
-          <div className="w-full max-w-3xl h-[80vh] overflow-auto rounded-2xl bg-white shadow-xl border border-slate-200 p-4">
+          <div className="w-full max-w-full h-[80vh] overflow-auto rounded-2xl bg-white shadow-xl border border-slate-200 p-4">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-lg font-semibold">Usporiadaná hierarchia súborov — Detail</h3>
               <div className="flex items-center gap-2">
