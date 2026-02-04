@@ -167,7 +167,7 @@ function FileHierarchyCard({ data }: { data: HierarchyNode[] }): ReactElement {
   );
 }
 
-function ProblemTableCard({ data }: { data: ProblemItem[] }): ReactElement {
+function ProblemTableCard({ data, fullMode = false, onExpand }: { data: ProblemItem[]; fullMode?: boolean; onExpand?: (d: ProblemItem[]) => void }): ReactElement {
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
 
@@ -185,7 +185,16 @@ function ProblemTableCard({ data }: { data: ProblemItem[] }): ReactElement {
   };
 
   return (
-    <div className="w-full my-2 overflow-x-auto border border-slate-200 rounded-xl bg-white px-0">
+    <div className={`w-full my-2 overflow-x-auto border border-slate-200 rounded-xl bg-white px-0 ${fullMode ? 'h-full p-4' : ''}`}>
+      {/* Expand button (only when not in fullMode) */}
+      {!fullMode && onExpand && (
+        <div className="flex justify-end px-3 pt-2">
+          <Button variant="ghost" size="sm" className="text-slate-600 cursor-pointer" onClick={() => onExpand(data)}>
+            Rozbaliť
+          </Button>
+        </div>
+      )}
+
       <table className="min-w-full text-sm text-slate-800">
         <thead>
           <tr className="border-b border-slate-200 bg-slate-50">
@@ -217,7 +226,7 @@ function ProblemTableCard({ data }: { data: ProblemItem[] }): ReactElement {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7 text-blue-600 hover:text-blue-700"
+                  className="h-7 w-7 text-blue-600 hover:text-blue-700 cursor-pointer"
                   onClick={(e) => {
                     e.stopPropagation();
                     // Mock: would open document
@@ -252,6 +261,7 @@ export function AiChatPanel(): ReactElement {
   const [loading, setLoading] = useState(false);
   const [mockWorkflowActive, setMockWorkflowActive] = useState(false);
   const [fadeState, setFadeState] = useState<'in' | 'out'>('out');
+  const [expandedTableData, setExpandedTableData] = useState<ProblemItem[] | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Animate fade-in on mount (agent mode open)
@@ -574,7 +584,7 @@ export function AiChatPanel(): ReactElement {
                 </div>
               ) : msg.type === "problemTable" && msg.problemData ? (
                 <div className="w-full">
-                  <ProblemTableCard data={msg.problemData} />
+                  <ProblemTableCard data={msg.problemData} onExpand={(d) => setExpandedTableData(d)} />
                 </div>
               ) : msg.type === "loading" ? (
                 <>
@@ -628,6 +638,21 @@ export function AiChatPanel(): ReactElement {
           </Button>
         </form>
       </CardContent>
+
+      {/* Overlay: expanded full table */}
+      {expandedTableData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6">
+          <div className="w-full max-w-4xl h-[80vh] overflow-auto rounded-2xl bg-white shadow-xl border border-slate-200 p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-semibold">Kompletná kontrola — Detaily problémov</h3>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" className="cursor-pointer" onClick={() => setExpandedTableData(null)}>Zavrieť</Button>
+              </div>
+            </div>
+            <ProblemTableCard data={expandedTableData} fullMode onExpand={undefined} />
+          </div>
+        </div>
+      )}
     </Card>
   );
 }
