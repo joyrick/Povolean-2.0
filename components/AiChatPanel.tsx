@@ -110,6 +110,18 @@ const mockProblems: ProblemItem[] = [
 function FileTreeNode({ node, level = 0 }: { node: HierarchyNode; level?: number }): ReactElement {
   const [expanded, setExpanded] = useState(true);
   const hasChildren = node.isDirectory && node.children && node.children.length > 0;
+  const contentRef = useRef<HTMLDivElement | null>(null);
+  const [maxHeight, setMaxHeight] = useState<string | number>(0);
+
+  useEffect(() => {
+    if (!hasChildren || !contentRef.current) return;
+    if (expanded) {
+      const h = contentRef.current.scrollHeight;
+      setMaxHeight(h + 8); // small padding
+    } else {
+      setMaxHeight(0);
+    }
+  }, [expanded, hasChildren]);
 
   return (
     <div>
@@ -119,11 +131,7 @@ function FileTreeNode({ node, level = 0 }: { node: HierarchyNode; level?: number
         onClick={() => hasChildren && setExpanded(!expanded)}
       >
         {hasChildren ? (
-          expanded ? (
-            <ChevronDown className="h-4 w-4 text-slate-400 flex-shrink-0" />
-          ) : (
-            <ChevronRight className="h-4 w-4 text-slate-400 flex-shrink-0" />
-          )
+          <ChevronDown className={`h-4 w-4 text-slate-400 flex-shrink-0 transform transition-transform duration-200 ${expanded ? 'rotate-0' : '-rotate-90'}`} />
         ) : (
           <span className="w-4" />
         )}
@@ -137,8 +145,12 @@ function FileTreeNode({ node, level = 0 }: { node: HierarchyNode; level?: number
           <span className="text-xs text-slate-400 ml-1 truncate">← {node.oldName}</span>
         )}
       </div>
-      {hasChildren && expanded && (
-        <div>
+      {hasChildren && (
+        <div
+          ref={contentRef}
+          style={{ maxHeight: typeof maxHeight === 'number' ? `${maxHeight}px` : maxHeight }}
+          className="overflow-hidden transition-[max-height] duration-200 ease-in-out"
+        >
           {node.children!.map((child, idx) => (
             <FileTreeNode key={`${child.name}-${idx}`} node={child} level={level + 1} />
           ))}
@@ -246,10 +258,12 @@ function ProblemTableCard({ data, fullMode = false, onExpand }: { data: ProblemI
             </tr>,
             expandedRow === item.id && (
               <tr key={item.id + "-expanded"}>
-                <td colSpan={5} className="px-6 pb-2 pt-0 text-slate-700 bg-slate-50 border-b border-slate-100">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">Detail:</span>
-                    <span>{item.problem}</span>
+                <td colSpan={5} className="px-6 pb-2 pt-0 bg-slate-50 border-b border-slate-100">
+                  <div className="overflow-hidden transition-all duration-200" style={{ maxHeight: expandedRow === item.id ? '200px' : '0px', opacity: expandedRow === item.id ? 1 : 0 }}>
+                    <div className="flex items-center gap-2 py-2 text-slate-700">
+                      <span className="font-medium">Detail:</span>
+                      <span>{item.problem}</span>
+                    </div>
                   </div>
                 </td>
               </tr>
@@ -270,11 +284,30 @@ export function AiChatPanel(): ReactElement {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [expandedTableData, setExpandedTableData] = useState<ProblemItem[] | null>(null);
   const [expandedHierarchyData, setExpandedHierarchyData] = useState<HierarchyNode[] | null>(null);
+  const [tableClosing, setTableClosing] = useState(false);
+  const [hierarchyClosing, setHierarchyClosing] = useState(false);
 
   // Animate fade-in on mount (agent mode open)
   useEffect(() => {
     setTimeout(() => setFadeState('in'), 10);
   }, []);
+
+  // Overlay close helpers with animation
+  function closeTableOverlay() {
+    setTableClosing(true);
+    setTimeout(() => {
+      setExpandedTableData(null);
+      setTableClosing(false);
+    }, 220);
+  }
+
+  function closeHierarchyOverlay() {
+    setHierarchyClosing(true);
+    setTimeout(() => {
+      setExpandedHierarchyData(null);
+      setHierarchyClosing(false);
+    }, 220);
+  }
 
   // New Conversation handler with animation
   async function handleNewConversation() {
@@ -648,12 +681,12 @@ export function AiChatPanel(): ReactElement {
 
       {/* Overlay: expanded full table */}
       {expandedTableData && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6">
-          <div className="w-full max-w-full h-[80vh] overflow-auto rounded-2xl bg-white shadow-xl border border-slate-200 p-4">
+        <div className={`fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6 transition-opacity duration-200 ${tableClosing ? 'opacity-0' : 'opacity-100'}`}>
+          <div className={`w-full max-w-full h-[80vh] overflow-auto rounded-2xl bg-white shadow-xl border border-slate-200 p-4 transform transition-all duration-250 ${tableClosing ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}`}>
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-lg font-semibold">Kompletná kontrola — Detaily problémov</h3>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" className="cursor-pointer" onClick={() => setExpandedTableData(null)}>Zavrieť</Button>
+                <Button variant="outline" size="sm" className="cursor-pointer" onClick={closeTableOverlay}>Zavrieť</Button>
               </div>
             </div>
             <ProblemTableCard data={expandedTableData} fullMode onExpand={undefined} />
@@ -663,12 +696,12 @@ export function AiChatPanel(): ReactElement {
 
       {/* Overlay: expanded hierarchy */}
       {expandedHierarchyData && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6">
-          <div className="w-full max-w-full h-[80vh] overflow-auto rounded-2xl bg-white shadow-xl border border-slate-200 p-4">
+        <div className={`fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6 transition-opacity duration-200 ${hierarchyClosing ? 'opacity-0' : 'opacity-100'}`}>
+          <div className={`w-full max-w-full h-[80vh] overflow-auto rounded-2xl bg-white shadow-xl border border-slate-200 p-4 transform transition-all duration-250 ${hierarchyClosing ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}`}>
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-lg font-semibold">Usporiadaná hierarchia súborov — Detail</h3>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" className="cursor-pointer" onClick={() => setExpandedHierarchyData(null)}>Zavrieť</Button>
+                <Button variant="outline" size="sm" className="cursor-pointer" onClick={closeHierarchyOverlay}>Zavrieť</Button>
               </div>
             </div>
             <FileHierarchyCard data={expandedHierarchyData} fullMode onExpand={undefined} />
