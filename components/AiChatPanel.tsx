@@ -148,17 +148,24 @@ function FileTreeNode({ node, level = 0 }: { node: HierarchyNode; level?: number
   );
 }
 
-function FileHierarchyCard({ data }: { data: HierarchyNode[] }): ReactElement {
+function FileHierarchyCard({ data, fullMode = false, onExpand }: { data: HierarchyNode[]; fullMode?: boolean; onExpand?: (d: HierarchyNode[]) => void }): ReactElement {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+    <div className={`rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden ${fullMode ? 'h-full' : ''}`}>
       <div className="bg-slate-50 px-4 py-3 border-b border-slate-200">
-        <div className="flex items-center gap-2">
-          <FolderOpen className="h-5 w-5 text-blue-600" />
-          <span className="font-semibold text-slate-800">Usporiadaná hierarchia súborov</span>
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-2">
+            <FolderOpen className="h-5 w-5 text-blue-600" />
+            <span className="font-semibold text-slate-800">Usporiadaná hierarchia súborov</span>
+          </div>
+          {!fullMode && onExpand && (
+            <Button variant="ghost" size="sm" className="text-slate-600 cursor-pointer" onClick={() => onExpand(data)}>
+              Rozbaliť
+            </Button>
+          )}
         </div>
         <p className="text-xs text-slate-500 mt-1">Podľa zákona 60/2025 Z. z.</p>
       </div>
-      <div className="p-3 max-h-64 overflow-y-auto">
+      <div className={`p-3 ${fullMode ? 'h-[calc(100%-64px)] overflow-auto' : 'max-h-64 overflow-y-auto'}`}>
         {data.map((node, idx) => (
           <FileTreeNode key={`${node.name}-${idx}`} node={node} />
         ))}
@@ -186,15 +193,14 @@ function ProblemTableCard({ data, fullMode = false, onExpand }: { data: ProblemI
 
   return (
     <div className={`w-full my-2 overflow-x-auto border border-slate-200 rounded-xl bg-white px-0 ${fullMode ? 'h-full p-4' : ''}`}>
-      {/* Expand button (only when not in fullMode) */}
-      {!fullMode && onExpand && (
-        <div className="flex justify-end px-3 pt-2">
+      <div className="bg-slate-50 px-3 py-2 border-b border-slate-200 flex items-center justify-between">
+        <div className="text-sm font-semibold text-slate-800">Zistené problémy</div>
+        {!fullMode && onExpand && (
           <Button variant="ghost" size="sm" className="text-slate-600 cursor-pointer" onClick={() => onExpand(data)}>
             Rozbaliť
           </Button>
-        </div>
-      )}
-
+        )}
+      </div>
       <table className="min-w-full text-sm text-slate-800">
         <thead>
           <tr className="border-b border-slate-200 bg-slate-50">
@@ -261,8 +267,9 @@ export function AiChatPanel(): ReactElement {
   const [loading, setLoading] = useState(false);
   const [mockWorkflowActive, setMockWorkflowActive] = useState(false);
   const [fadeState, setFadeState] = useState<'in' | 'out'>('out');
-  const [expandedTableData, setExpandedTableData] = useState<ProblemItem[] | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [expandedTableData, setExpandedTableData] = useState<ProblemItem[] | null>(null);
+  const [expandedHierarchyData, setExpandedHierarchyData] = useState<HierarchyNode[] | null>(null);
 
   // Animate fade-in on mount (agent mode open)
   useEffect(() => {
@@ -580,7 +587,7 @@ export function AiChatPanel(): ReactElement {
             >
               {msg.type === "hierarchy" && msg.hierarchyData ? (
                 <div className="w-full max-w-md">
-                  <FileHierarchyCard data={msg.hierarchyData} />
+                  <FileHierarchyCard data={msg.hierarchyData} onExpand={(d) => setExpandedHierarchyData(d)} />
                 </div>
               ) : msg.type === "problemTable" && msg.problemData ? (
                 <div className="w-full">
@@ -650,6 +657,21 @@ export function AiChatPanel(): ReactElement {
               </div>
             </div>
             <ProblemTableCard data={expandedTableData} fullMode onExpand={undefined} />
+          </div>
+        </div>
+      )}
+
+      {/* Overlay: expanded hierarchy */}
+      {expandedHierarchyData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6">
+          <div className="w-full max-w-3xl h-[80vh] overflow-auto rounded-2xl bg-white shadow-xl border border-slate-200 p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-semibold">Usporiadaná hierarchia súborov — Detail</h3>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" className="cursor-pointer" onClick={() => setExpandedHierarchyData(null)}>Zavrieť</Button>
+              </div>
+            </div>
+            <FileHierarchyCard data={expandedHierarchyData} fullMode onExpand={undefined} />
           </div>
         </div>
       )}
